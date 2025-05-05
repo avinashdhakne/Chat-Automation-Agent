@@ -1,0 +1,11 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@langchain/ollama": "^0.2.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "node-fetch": "^3.3.2",
+    "ollama": "^0.5.15",
+    "readline-sync": "^1.4.10"
+  }
+}
