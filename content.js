@@ -303,6 +303,10 @@ async function initializeChatbot() {
             else if (message.action === 'stopRecording') {
                 stopRecordBtn.click();
                 sendResponse({ success: true });
+            } 
+            else if (message.action === 'extractElements') {
+                const elements = extractInteractiveElements();
+                sendResponse({ success: true, elements: elements });
             }
             
             return true; // Keep the message channel open for async response
@@ -329,3 +333,387 @@ async function initializeChatbot() {
 
 // Start initialization
 initializeChatbot();
+
+// Element extraction for site crawler
+function extractInteractiveElements() {
+    // Container for all elements with their keywords
+    const elements = [];
+    
+    // Extract inputs
+    const inputs = document.querySelectorAll('input:not([type="hidden"]), textarea');
+    inputs.forEach(input => {
+        const element = {
+            type: input.tagName.toLowerCase(),
+            inputType: input.getAttribute('type') || 'text',
+            placeholder: input.getAttribute('placeholder') || '',
+            ariaLabel: input.getAttribute('aria-label') || '',
+            name: input.getAttribute('name') || '',
+            id: input.getAttribute('id') || '',
+            required: input.required || false,
+            selector: generateUniqueSelector(input)
+        };
+        
+        // Generate keyword
+        element.keyword = generateKeyword(element);
+        elements.push(element);
+    });
+    
+    // Extract buttons
+    const buttons = document.querySelectorAll('button, input[type="button"], input[type="submit"]');
+    buttons.forEach(button => {
+        const element = {
+            type: 'button',
+            text: button.innerText || button.value || '',
+            ariaLabel: button.getAttribute('aria-label') || '',
+            name: button.getAttribute('name') || '',
+            id: button.getAttribute('id') || '',
+            selector: generateUniqueSelector(button)
+        };
+        
+        // Generate keyword
+        element.keyword = generateKeyword(element);
+        elements.push(element);
+    });
+    
+    // Extract links
+    const links = document.querySelectorAll('a[href]');
+    links.forEach(link => {
+        const element = {
+            type: 'link',
+            href: link.getAttribute('href'),
+            text: link.innerText.trim() || link.getAttribute('title') || '',
+            ariaLabel: link.getAttribute('aria-label') || '',
+            id: link.getAttribute('id') || '',
+            selector: generateUniqueSelector(link)
+        };
+        
+        // Generate keyword
+        element.keyword = generateKeyword(element);
+        elements.push(element);
+    });
+    
+    // Extract select dropdowns
+    const selects = document.querySelectorAll('select');
+    selects.forEach(select => {
+        const options = Array.from(select.options).map(option => option.text);
+        const element = {
+            type: 'select',
+            options: options,
+            ariaLabel: select.getAttribute('aria-label') || '',
+            name: select.getAttribute('name') || '',
+            id: select.getAttribute('id') || '',
+            selector: generateUniqueSelector(select)
+        };
+        
+        // Generate keyword
+        element.keyword = generateKeyword(element);
+        elements.push(element);
+    });
+    
+    // Extract images
+    const images = document.querySelectorAll('img');
+    images.forEach(img => {
+        const element = {
+            type: 'img',
+            src: img.getAttribute('src') || '',
+            alt: img.getAttribute('alt') || '',
+            id: img.getAttribute('id') || '',
+            selector: generateUniqueSelector(img)
+        };
+        
+        // Generate keyword
+        element.keyword = generateKeyword(element);
+        elements.push(element);
+    });
+    
+    return {
+        url: window.location.href,
+        title: document.title,
+        elements: elements
+    };
+}
+
+// Generate a keyword for an element based on its attributes
+function generateKeyword(element) {
+    let keyword = '';
+    
+    // Try different attributes in order of preference
+    if (element.ariaLabel) {
+        keyword = element.ariaLabel;
+    } else if (element.placeholder) {
+        keyword = element.placeholder;
+    } else if (element.alt) {
+        keyword = element.alt;
+    } else if (element.name) {
+        keyword = element.name;
+    } else if (element.id) {
+        keyword = element.id;
+    } else if (element.text && element.text.trim()) {
+        keyword = element.text.trim();
+    } else {
+        // Generate a keyword based on element type and a random string
+        keyword = `${element.type}_${Math.random().toString(36).substring(2, 10)}`;
+    }
+    
+    // Clean up the keyword
+    return keyword
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '_')
+        .substring(0, 50); // Keep keywords reasonably sized
+}
+
+// Generate a unique CSS selector for an element
+function generateUniqueSelector(element) {
+    if (element.id) {
+        return `#${element.id}`;
+    }
+    
+    if (element.className && typeof element.className === 'string' && element.className.trim() !== '') {
+        const classes = element.className.split(' ')
+            .filter(c => c.trim() !== '')
+            .map(c => `.${c}`)
+            .join('');
+        if (classes) {
+            return `${element.tagName.toLowerCase()}${classes}`;
+        }
+    }
+    
+    // Path selector as fallback
+    let path = element.tagName.toLowerCase();
+    let parent = element.parentElement;
+    let pathLimit = 5; // Limit the path depth
+    
+    while (parent && pathLimit > 0) {
+        path = `${parent.tagName.toLowerCase()} > ${path}`;
+        parent = parent.parentElement;
+        pathLimit--;
+    }
+    
+    return path;
+}
+
+// Variable to track if we're recording
+let isRecording = false;
+let recordedActions = [];
+let startTimestamp = 0;
+
+// Start recording user actions
+function startRecording() {
+    console.log('Starting to record user actions');
+    isRecording = true;
+    recordedActions = [];
+    startTimestamp = Date.now();
+    
+    // Add listeners for user interactions
+    document.addEventListener('click', recordClick);
+    document.addEventListener('input', recordInput);
+    document.addEventListener('change', recordChange);
+    
+    // Highlight the page or show recording status
+    addRecordingIndicator();
+}
+
+// Stop recording
+function stopRecording() {
+    console.log('Stopping recording');
+    isRecording = false;
+    
+    // Remove listeners
+    document.removeEventListener('click', recordClick);
+    document.removeEventListener('input', recordInput);
+    document.removeEventListener('change', recordChange);
+    
+    // Remove recording indicator
+    removeRecordingIndicator();
+    
+    // Save the recording
+    saveRecording();
+}
+
+// Record click events
+function recordClick(event) {
+    if (!isRecording) return;
+    
+    const element = event.target;
+    const timeOffset = Date.now() - startTimestamp;
+    
+    // Skip if it's on the recording indicator
+    if (element.closest('#recording-indicator')) return;
+    
+    // Determine what was clicked
+    const action = {
+        type: 'click',
+        timeOffset,
+        timestamp: new Date().toISOString(),
+        element: {
+            tagName: element.tagName,
+            id: element.id,
+            className: element.className,
+            innerText: element.innerText ? element.innerText.substring(0, 100) : '',
+            href: element.href || '',
+            selector: generateUniqueSelector(element)
+        }
+    };
+    
+    recordedActions.push(action);
+    console.log('Recorded click:', action);
+}
+
+// Record input events (typing)
+function recordInput(event) {
+    if (!isRecording) return;
+    
+    const element = event.target;
+    const timeOffset = Date.now() - startTimestamp;
+    
+    // Skip if it's on the recording indicator
+    if (element.closest('#recording-indicator')) return;
+    
+    // Only record for input-capable elements
+    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.isContentEditable) {
+        const value = element.value || element.innerText;
+        
+        const action = {
+            type: 'input',
+            timeOffset,
+            timestamp: new Date().toISOString(),
+            element: {
+                tagName: element.tagName,
+                id: element.id,
+                className: element.className,
+                inputType: element.type,
+                name: element.name,
+                value: value ? value.substring(0, 100) : '',
+                selector: generateUniqueSelector(element)
+            }
+        };
+        
+        // Debounce input recording
+        if (recordedActions.length > 0) {
+            const lastAction = recordedActions[recordedActions.length - 1];
+            if (lastAction.type === 'input' && 
+                lastAction.element.selector === action.element.selector &&
+                timeOffset - lastAction.timeOffset < 1000) {
+                // Update the last action instead of adding a new one
+                lastAction.element.value = action.element.value;
+                lastAction.timeOffset = timeOffset;
+                lastAction.timestamp = action.timestamp;
+                return;
+            }
+        }
+        
+        recordedActions.push(action);
+        console.log('Recorded input:', action);
+    }
+}
+
+// Record select/checkbox/radio changes
+function recordChange(event) {
+    if (!isRecording) return;
+    
+    const element = event.target;
+    const timeOffset = Date.now() - startTimestamp;
+    
+    // Skip if it's on the recording indicator
+    if (element.closest('#recording-indicator')) return;
+    
+    let value;
+    if (element.type === 'checkbox' || element.type === 'radio') {
+        value = element.checked;
+    } else {
+        value = element.value;
+    }
+    
+    const action = {
+        type: 'change',
+        timeOffset,
+        timestamp: new Date().toISOString(),
+        element: {
+            tagName: element.tagName,
+            id: element.id,
+            className: element.className,
+            inputType: element.type,
+            name: element.name,
+            value,
+            selector: generateUniqueSelector(element)
+        }
+    };
+    
+    recordedActions.push(action);
+    console.log('Recorded change:', action);
+}
+
+// Save the recording to the background script
+function saveRecording() {
+    const recordingData = {
+        url: window.location.href,
+        title: document.title,
+        startTime: new Date(startTimestamp).toISOString(),
+        endTime: new Date().toISOString(),
+        actions: recordedActions
+    };
+    
+    const filename = `recording_${Date.now()}.json`;
+    
+    chrome.runtime.sendMessage({
+        action: 'saveRecordedActions',
+        data: recordingData,
+        filename
+    }, (response) => {
+        if (response && response.success) {
+            console.log('Recording saved:', response);
+        } else {
+            console.error('Failed to save recording:', response);
+        }
+    });
+}
+
+// Add a visual indicator that recording is in progress
+function addRecordingIndicator() {
+    const indicator = document.createElement('div');
+    indicator.id = 'recording-indicator';
+    indicator.style.position = 'fixed';
+    indicator.style.top = '10px';
+    indicator.style.right = '10px';
+    indicator.style.padding = '10px 20px';
+    indicator.style.background = 'rgba(255, 0, 0, 0.7)';
+    indicator.style.color = 'white';
+    indicator.style.borderRadius = '5px';
+    indicator.style.fontFamily = 'Arial, sans-serif';
+    indicator.style.fontSize = '14px';
+    indicator.style.zIndex = '9999';
+    indicator.textContent = 'Recording Actions...';
+    
+    document.body.appendChild(indicator);
+}
+
+// Remove the recording indicator
+function removeRecordingIndicator() {
+    const indicator = document.getElementById('recording-indicator');
+    if (indicator) {
+        indicator.parentNode.removeChild(indicator);
+    }
+}
+
+// After the page loads, check if we're in crawler mode (run by the extension)
+if (window.location.href.includes('crawler=true') || document.referrer.includes('chrome-extension://')) {
+    // This page is being viewed as part of a crawl
+    console.log('Page loaded in crawler mode');
+    
+    // Extract all interactive elements and send them to background
+    setTimeout(() => {
+        const elements = extractInteractiveElements();
+        chrome.runtime.sendMessage({
+            action: 'savePageElements',
+            url: window.location.href,
+            elements: elements
+        }, (response) => {
+            console.log('Elements saved response:', response);
+        });
+    }, 1000); // Small delay to ensure page is fully loaded
+}
+
+// If this script is injected by the site crawler, extract elements immediately
+if (window.crawlerExtraction) {
+    return extractInteractiveElements();
+}

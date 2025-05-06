@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Site Crawler</title>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      width: 800px;
+      height: 600px;
+    }
+    
+    .container {
+      margin: 20px;
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    
+    .control-panel {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    
+    .checkbox-group {
+      margin-bottom: 5px;
+    }
+    
+    .button-group {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+    }
+    
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    .primary-btn {
+      background-color: #4285f4;
+      color: white;
+    }
+    
+    .secondary-btn {
+      background-color: #f1f1f1;
+      color: #333;
+    }
+    
+    .danger-btn {
+      background-color: #ea4335;
+      color: white;
+    }
+    
+    .progress-bar {
+      height: 20px;
+      background-color: #f1f1f1;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    
+    .progress-bar-fill {
+      height: 100%;
+      background-color: #4285f4;
+      transition: width 0.3s ease;
+    }
+    
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .stat-item {
+      background-color: #fff;
+      padding: 10px;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      flex: 1;
+      min-width: 120px;
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #4285f4;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .log-container {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 15px;
+      height: 200px;
+      overflow-y: auto;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    
+    .log-entry {
+      margin-bottom: 5px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    
+    .error {
+      color: #ea4335;
+    }
+    
+    .success {
+      color: #34a853;
+    }
+    
+    .info {
+      color: #4285f4;
+    }
+    
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 15px;
+    }
+    
+    .tab {
+      padding: 10px 15px;
+      cursor: pointer;
+      background-color: #f1f1f1;
+      border-radius: 4px 4px 0 0;
+      margin-right: 5px;
+    }
+    
+    .tab.active {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-bottom: none;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    th {
+      background-color: #f5f5f5;
+    }
+    
+    .element-card {
+      background-color: #fff;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .element-keyword {
+      font-weight: bold;
+      color: #4285f4;
+    }
+    
+    .element-details {
+      margin-top: 5px;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Site Crawler</h1>
+    
+    <div class="tabs">
+      <div class="tab active" data-tab="crawl">Crawl</div>
+      <div class="tab" data-tab="results">Results</div>
+      <div class="tab" data-tab="elements">Interactive Elements</div>
+      <div class="tab" data-tab="settings">Settings</div>
+    </div>
+    
+    <div id="crawl-tab" class="tab-content active">
+      <div class="control-panel">
+        <div class="form-group">
+          <label for="start-url">Start URL:</label>
+          <input type="text" id="start-url" placeholder="https://example.com">
+        </div>
+        
+        <div class="form-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="include-screenshots" checked>
+            <label for="include-screenshots">Include screenshots</label>
+          </div>
+          
+          <div class="checkbox-group">
+            <input type="checkbox" id="ignore-params" checked>
+            <label for="ignore-params">Ignore URL parameters</label>
+          </div>
+        </div>
+        
+        <div class="button-group">
+          <button id="start-crawl" class="primary-btn">Start Crawling</button>
+          <button id="stop-crawl" class="danger-btn" disabled>Stop</button>
+        </div>
+      </div>
+      
+      <div id="progress-section" style="display: none;">
+        <h2>Progress</h2>
+        
+        <div class="stats">
+          <div class="stat-item">
+            <div id="pages-visited" class="stat-number">0</div>
+            <div class="stat-label">Pages Visited</div>
+          </div>
+          <div class="stat-item">
+            <div id="links-found" class="stat-number">0</div>
+            <div class="stat-label">Links Found</div>
+          </div>
+          <div class="stat-item">
+            <div id="elements-found" class="stat-number">0</div>
+            <div class="stat-label">Elements Found</div>
+          </div>
+          <div class="stat-item">
+            <div id="errors" class="stat-number">0</div>
+            <div class="stat-label">Errors</div>
+          </div>
+        </div>
+        
+        <div class="progress-bar">
+          <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%;"></div>
+        </div>
+        
+        <div class="log-container" id="log">
+          <div class="log-entry info">Ready to start crawling...</div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="results-tab" class="tab-content">
+      <div class="control-panel">
+        <h2>Crawl Results</h2>
+        
+        <div class="stats">
+          <div class="stat-item">
+            <div id="result-pages" class="stat-number">0</div>
+            <div class="stat-label">Pages</div>
+          </div>
+          <div class="stat-item">
+            <div id="result-links" class="stat-number">0</div>
+            <div class="stat-label">Links</div>
+          </div>
+          <div class="stat-item">
+            <div id="result-elements" class="stat-number">0</div>
+            <div class="stat-label">Interactive Elements</div>
+          </div>
+        </div>
+        
+        <div class="button-group">
+          <button id="download-json" class="secondary-btn">Download Graph (JSON)</button>
+          <button id="download-dot" class="secondary-btn">Download Graph (DOT)</button>
+          <button id="clear-results" class="danger-btn">Clear Results</button>
+        </div>
+      </div>
+      
+      <div id="graph-container">
+        <h2>Pages</h2>
+        <table id="pages-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>URL</th>
+              <th>Links</th>
+              <th>Elements</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Pages will be added here dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div id="elements-tab" class="tab-content">
+      <div class="control-panel">
+        <h2>Interactive Elements with Keywords</h2>
+        
+        <div class="button-group">
+          <button id="download-elements" class="secondary-btn">Download Elements (JSON)</button>
+          <button id="clear-elements" class="danger-btn">Clear Elements</button>
+        </div>
+      </div>
+      
+      <div id="elements-container">
+        <!-- Elements will be added here dynamically -->
+      </div>
+    </div>
+    
+    <div id="settings-tab" class="tab-content">
+      <div class="control-panel">
+        <h2>Advanced Settings</h2>
+        
+        <div class="form-group">
+          <label for="max-depth">Maximum Crawl Depth:</label>
+          <input type="number" id="max-depth" value="3" min="1" max="10">
+        </div>
+        
+        <div class="form-group">
+          <label for="max-pages">Maximum Pages to Visit:</label>
+          <input type="number" id="max-pages" value="100" min="1" max="1000">
+        </div>
+        
+        <div class="form-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="follow-external" checked>
+            <label for="follow-external">Follow external links</label>
+          </div>
+          
+          <div class="checkbox-group">
+            <input type="checkbox" id="capture-buttons" checked>
+            <label for="capture-buttons">Capture button interactions</label>
+          </div>
+        </div>
+        
+        <div class="button-group">
+          <button id="save-settings" class="primary-btn">Save Settings</button>
+          <button id="reset-settings" class="secondary-btn">Reset to Defaults</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="components/siteCrawler.js" type="module"></script>
+  <script src="site-crawler.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+
+- [ ] Fine tune the model with the product data
+- [ ] Add states to the chat model 
+- [ ] Add a database to store the chat history

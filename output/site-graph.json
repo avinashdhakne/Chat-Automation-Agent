@@ -1,0 +1,34 @@
+{
+  "graph": {
+    "nodes": {},
+    "edges": []
+  },
+  "stats": {
+    "pagesVisited": 0,
+    "linksFound": 0,
+    "startTime": "2025-05-06T11:30:27.651Z",
+    "endTime": "2025-05-06T11:30:34.816Z",
+    "errors": [
+      "Error crawling https://znlwedirrbbx05.na.wkglobal.com:8671/reporting-webapp/: net::ERR_CERT_AUTHORITY_INVALID at https://znlwedirrbbx05.na.wkglobal.com:8671/reporting-webapp/"
+    ],
+    "nodeCount": 0,
+    "edgeCount": 0
+  },
+  "config": {
+    "maxDepth": 3,
+    "maxPages": 100,
+    "maxLinksPerPage": 50,
+    "timeout": 30000,
+    "respectRobotsTxt": true,
+    "saveScreenshots": true,
+    "outputDir": "./output",
+    "screenshotsDir": "./output/screenshots",
+    "exportGraph": true,
+    "graphOutputPath": "./output/site-graph.json",
+    "ignoreParams": true,
+    "followExternalLinks": false,
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewportWidth": 1280,
+    "viewportHeight": 800
+  }
+}

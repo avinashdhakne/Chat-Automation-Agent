@@ -8,11 +8,13 @@
     "scripting",
     "storage",
     "contextMenus",
-    "downloads"
+    "downloads",
+    "tabs"
   ],
   "host_permissions": [
     "http://localhost:3000/*",
-    "http://localhost:3001/*"
+    "http://localhost:3001/*",
+    "<all_urls>"
   ],
   "background": {
     "service_worker": "background.js",
@@ -33,5 +35,10 @@
       "resources": ["components/*"],
       "matches": ["<all_urls>"]
     }
-  ]
+  ],
+  "chrome_url_overrides": {
+  },
+  "commands": {
+  },
+  "options_page": "site-crawler.html"
 }

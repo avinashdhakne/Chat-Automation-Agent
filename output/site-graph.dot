@@ -1,0 +1,4 @@
+digraph SiteMap {
+  rankdir=LR;
+  node [shape=box, style=filled, fillcolor=lightblue];
+}

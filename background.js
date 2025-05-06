@@ -28,6 +28,93 @@ const recordedActionsStorage = {
     }
 };
 
+// Site Crawler state management
+const siteCrawlerState = {
+    // Flag to indicate if a crawl is currently running
+    isRunning: false,
+    
+    // Storage for interactive elements with keywords
+    elements: {},
+    
+    // URL currently being processed
+    currentUrl: null,
+    
+    // Store elements for a specific page
+    saveElements: function(url, pageElements) {
+        const urlKey = this.getUrlKey(url);
+        this.elements[urlKey] = pageElements;
+        
+        // Save to chrome storage
+        chrome.storage.local.set({
+            'site_crawler_elements': this.elements
+        });
+        
+        return true;
+    },
+    
+    // Get all stored elements
+    getAllElements: function() {
+        return this.elements;
+    },
+    
+    // Search for elements by keyword
+    searchElementsByKeyword: function(keyword) {
+        const results = {};
+        
+        for (const urlKey in this.elements) {
+            const pageElements = this.elements[urlKey].elements.filter(element => 
+                element.keyword && element.keyword.includes(keyword.toLowerCase())
+            );
+            
+            if (pageElements.length > 0) {
+                results[urlKey] = {
+                    url: this.elements[urlKey].url,
+                    title: this.elements[urlKey].title,
+                    elements: pageElements
+                };
+            }
+        }
+        
+        return results;
+    },
+    
+    // Create a key from URL for storage
+    getUrlKey: function(url) {
+        try {
+            const parsedUrl = new URL(url);
+            let path = parsedUrl.pathname;
+            
+            // Remove trailing slash
+            if (path.endsWith('/') && path !== '/') {
+                path = path.slice(0, -1);
+            }
+            
+            // For root path, use 'home'
+            if (path === '/') {
+                path = '/home';
+            }
+            
+            // Remove leading slash and replace special chars
+            const id = path
+                .substring(1)
+                .replace(/[^a-zA-Z0-9]/g, '_')
+                .toLowerCase();
+            
+            return id || 'home';
+        } catch (error) {
+            console.error(`Error generating ID for ${url}:`, error);
+            return 'unknown_' + Math.random().toString(36).substring(2, 10);
+        }
+    }
+};
+
+// Initialize site crawler elements from storage
+chrome.storage.local.get(['site_crawler_elements'], function(result) {
+    if (result && result.site_crawler_elements) {
+        siteCrawlerState.elements = result.site_crawler_elements;
+    }
+});
+
 // Function to save recording to workflows directory using FileSystem API
 function saveRecordingToWorkflowsDir(data, filename) {
     try {
@@ -76,7 +163,7 @@ function listWorkflowFiles() {
     });
 }
 
-// Listen for messages from content scripts
+// Listen for messages from content scripts or popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log("Background script received message:", message);
     
@@ -96,6 +183,59 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             sendResponse({ success: true, files });
         });
         return true; // Keep the message channel open for async response
+    }
+    
+    // Site crawler message handlers
+    if (message.action === 'startCrawling') {
+        siteCrawlerState.isRunning = true;
+        siteCrawlerState.currentUrl = message.startUrl;
+        
+        // Open the crawler page with the current URL
+        chrome.storage.local.set({
+            'crawler_start_url': message.startUrl,
+            'crawler_auto_start': true
+        }, function() {
+            chrome.runtime.openOptionsPage();
+        });
+        
+        sendResponse({ success: true, message: 'Starting crawler' });
+        return true;
+    }
+    
+    if (message.action === 'stopCrawling') {
+        siteCrawlerState.isRunning = false;
+        sendResponse({ success: true, message: 'Crawler stopped' });
+        return true;
+    }
+    
+    if (message.action === 'savePageElements') {
+        try {
+            const result = siteCrawlerState.saveElements(message.url, message.elements);
+            sendResponse({ success: true, message: 'Elements saved' });
+        } catch (error) {
+            console.error('Error saving page elements:', error);
+            sendResponse({ success: false, message: error.message });
+        }
+        return true;
+    }
+    
+    if (message.action === 'searchElements') {
+        try {
+            const results = siteCrawlerState.searchElementsByKeyword(message.keyword);
+            sendResponse({ success: true, results });
+        } catch (error) {
+            console.error('Error searching elements:', error);
+            sendResponse({ success: false, message: error.message });
+        }
+        return true;
+    }
+    
+    if (message.action === 'getAllElements') {
+        sendResponse({ 
+            success: true, 
+            elements: siteCrawlerState.getAllElements() 
+        });
+        return true;
     }
     
     // Handle other message types here
@@ -120,6 +260,25 @@ chrome.runtime.onInstalled.addListener(() => {
         title: 'Manage Recorded Workflows',
         contexts: ['page']
     });
+    
+    // Add site crawler context menu items
+    chrome.contextMenus.create({
+        id: 'separator1',
+        type: 'separator',
+        contexts: ['page']
+    });
+    
+    chrome.contextMenus.create({
+        id: 'startCrawling',
+        title: 'Start Crawling This Site',
+        contexts: ['page']
+    });
+    
+    chrome.contextMenus.create({
+        id: 'openCrawlerSettings',
+        title: 'Open Site Crawler Settings',
+        contexts: ['page']
+    });
 });
 
 // Handle context menu clicks
@@ -132,5 +291,22 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     }
     else if (info.menuItemId === 'manageWorkflows') {
         chrome.tabs.create({ url: chrome.runtime.getURL('workflow-manager.html') });
+    }
+    // Site crawler context menu handlers
+    else if (info.menuItemId === 'startCrawling') {
+        // Start crawling on the current site
+        siteCrawlerState.isRunning = true;
+        siteCrawlerState.currentUrl = tab.url;
+        
+        // Open the crawler page with the current URL
+        chrome.storage.local.set({
+            'crawler_start_url': tab.url,
+            'crawler_auto_start': true
+        }, function() {
+            chrome.runtime.openOptionsPage();
+        });
+    }
+    else if (info.menuItemId === 'openCrawlerSettings') {
+        chrome.runtime.openOptionsPage();
     }
 });
