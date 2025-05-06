@@ -1,0 +1,114 @@
+{
+  "https://znlwedirrbbx05.na.wkglobal.com:8671/reporting-webapp/": {
+    "title": "Sign in to your account",
+    "elements": [
+      {
+        "tagName": "input",
+        "id": "i0116",
+        "classes": "form-control ltr_override input ext-input text-box ext-text-box",
+        "keyword": "WK Enterprise ID (email address)",
+        "type": "email",
+        "text": "",
+        "href": "",
+        "position": {
+          "x": 509.20001220703125,
+          "y": 299.2250061035156,
+          "width": 348,
+          "height": 36
+        }
+      },
+      {
+        "tagName": "a",
+        "id": "cantAccessAccount",
+        "classes": "",
+        "keyword": "cannotAccessAccount",
+        "type": "",
+        "text": "Can’t access your account?",
+        "href": "https://login.microsoftonline.com/8ac76c91-e7f1-41ff-a89c-3553b2da2c17/oauth2/v2.0/authorize?response_type=code&client_id=6684a487-9b78-4664-a720-f4ef02612e55&scope=openid%20profile%20email&state=J3JME0Ca7Z0uqo1bBw2ZtVL6jbCMubZfnICrypm5TtI%3D&redirect_uri=https://znlwedirrbbx05.na.wkglobal.com:8671/reporting-webapp/login/oauth2/code/login.microsoftonline.com&nonce=FELNAS0mTKv3tqznuXO-gR5x_G8bQdYE8MY3Ax6gx3E&code_challenge=rj2DD4j1FKb4lY-uUmWngAg17OHjI4DXKOY-d2i7DNI&code_challenge_method=S256#",
+        "position": {
+          "x": 509.20001220703125,
+          "y": 352.0249938964844,
+          "width": 153.5124969482422,
+          "height": 17.600000381469727
+        }
+      },
+      {
+        "tagName": "input",
+        "id": "idSIButton9",
+        "classes": "win-button button_primary high-contrast-overrides button ext-button primary ext-primary",
+        "keyword": "idSIButton9",
+        "type": "submit",
+        "text": "",
+        "href": "",
+        "position": {
+          "x": 751.2000122070312,
+          "y": 433.2250061035156,
+          "width": 108,
+          "height": 32
+        }
+      },
+      {
+        "tagName": "div",
+        "id": "",
+        "classes": "table",
+        "keyword": "Sign-in options undefined",
+        "type": "",
+        "text": "Sign-in options",
+        "href": "",
+        "position": {
+          "x": 463.20001220703125,
+          "y": 529.2250366210938,
+          "width": 440,
+          "height": 48
+        }
+      },
+      {
+        "tagName": "a",
+        "id": "ftrTerms",
+        "classes": "footer-content ext-footer-content footer-item ext-footer-item has-background ext-has-background",
+        "keyword": "ftrTerms",
+        "type": "",
+        "text": "Terms of use",
+        "href": "https://www.microsoft.com/en-US/servicesagreement/",
+        "position": {
+          "x": 1139.1500244140625,
+          "y": 740.2250366210938,
+          "width": 66.51250457763672,
+          "height": 28
+        }
+      },
+      {
+        "tagName": "a",
+        "id": "ftrPrivacy",
+        "classes": "footer-content ext-footer-content footer-item ext-footer-item has-background ext-has-background",
+        "keyword": "ftrPrivacy",
+        "type": "",
+        "text": "Privacy & cookies",
+        "href": "https://privacy.microsoft.com/en-US/privacystatement",
+        "position": {
+          "x": 1225.2249755859375,
+          "y": 740.2250366210938,
+          "width": 93.0250015258789,
+          "height": 28
+        }
+      },
+      {
+        "tagName": "a",
+        "id": "moreOptions",
+        "classes": "footer-content ext-footer-content footer-item ext-footer-item debug-item ext-debug-item has-background ext-has-background",
+        "keyword": "Click here for troubleshooting information",
+        "type": "",
+        "text": "...",
+        "href": "https://login.microsoftonline.com/8ac76c91-e7f1-41ff-a89c-3553b2da2c17/oauth2/v2.0/authorize?response_type=code&client_id=6684a487-9b78-4664-a720-f4ef02612e55&scope=openid%20profile%20email&state=J3JME0Ca7Z0uqo1bBw2ZtVL6jbCMubZfnICrypm5TtI%3D&redirect_uri=https://znlwedirrbbx05.na.wkglobal.com:8671/reporting-webapp/login/oauth2/code/login.microsoftonline.com&nonce=FELNAS0mTKv3tqznuXO-gR5x_G8bQdYE8MY3Ax6gx3E&code_challenge=rj2DD4j1FKb4lY-uUmWngAg17OHjI4DXKOY-d2i7DNI&code_challenge_method=S256#",
+        "position": {
+          "x": 1337.8125,
+          "y": 740.2250366210938,
+          "width": 20.587499618530273,
+          "height": 22
+        }
+      }
+    ],
+    "timestamp": "2025-05-06T15:44:48.526Z",
+    "links": []
+  }
+}

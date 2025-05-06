@@ -1,0 +1,19 @@
+{
+  "name": "web-crawler",
+  "version": "1.0.0",
+  "description": "A complete web crawler using Puppeteer",
+  "main": "crawler.js",
+  "scripts": {
+    "start": "node crawler.js"
+  },
+  "dependencies": {
+    "puppeteer": "^21.0.0",
+    "commander": "^11.0.0",
+    "chalk": "^4.1.2",
+    "fs-extra": "^11.1.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "type": "commonjs"
+}
